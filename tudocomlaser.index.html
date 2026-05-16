@@ -1,0 +1,858 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Instagram, Sparkles, Sun, Moon, X, ChevronRight, ChevronLeft, Rocket, RotateCw
+} from 'lucide-react';
+
+// --- ÍCONE PERSONALIZADO DO WHATSAPP ---
+const WhatsAppIcon = ({ size = 24, className = "" }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.405-.883-.733-1.48-1.638-1.653-1.935-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
+  </svg>
+);
+
+// --- CONFIGURAÇÕES E DADOS ---
+const WHATSAPP_NUMBER = "5581992064543"; 
+const WHATSAPP_BASE_MSG = "Olá! Vim pelo site e quero o orçamento deste produto";
+const WHATSAPP_GENERIC_MSG = "Olá! Gostaria de falar com vocês.";
+
+const CATEGORIES = [
+  { id: '360-graus', name: 'Gravação 360º', desc: 'Personalização completa em 360 graus para copos e garrafas.' },
+  { id: 'copos', name: 'Copos Térmicos', desc: 'Copos térmicos personalizados com gravação a laser (360ml e 473ml).' },
+  { id: 'garrafas', name: 'Garrafas térmicas', desc: 'Garrafas térmicas personalizadas para presentes, empresas e uso diário.' },
+  { id: 'kit-churrasco', name: 'Kit churrasco', desc: 'Kits personalizados para presente, datas comemorativas e brindes.' },
+  { id: 'porta-joias', name: 'Porta jóias', desc: 'Porta jóias personalizados com acabamento elegante.' },
+  { id: 'tabuas', name: 'Tábuas rústicas', desc: 'Tábuas rústicas personalizadas com gravação a laser.' }
+];
+
+const STORY_IMAGES = [
+  'https://i.imgur.com/k4qeCZX.jpg',
+  'https://i.imgur.com/rpmWE6B.jpg',
+  'https://i.imgur.com/3jKBcpL.jpg',
+  'https://i.imgur.com/qpTmruj.jpg',
+  'https://i.imgur.com/cOQap6E.jpg',
+  'https://i.imgur.com/s11RxAL.jpg',
+  'https://i.imgur.com/ylN2RG1.jpg',
+  'https://i.imgur.com/h6v6avA.jpg'
+];
+
+const WORK_IMAGES = [
+  'https://i.imgur.com/70WrggZ.jpg',
+  'https://i.imgur.com/SzorQhA.jpg',
+  'https://i.imgur.com/ovnrYLT.jpg',
+  'https://i.imgur.com/XLYQLn3.jpg',
+  'https://i.imgur.com/70WrggZ.jpg',
+  'https://i.imgur.com/SzorQhA.jpg',
+  'https://i.imgur.com/ovnrYLT.jpg',
+  'https://i.imgur.com/XLYQLn3.jpg',
+];
+
+const PRODUCTS_DB = {
+  '360-graus': [
+    { 
+      id: '360_1', 
+      name: 'Copo 360º Personalizado', 
+      img: 'https://i.imgur.com/YlJNLdN.mp4', 
+      isGif: true 
+    },
+    { 
+      id: '360_2', 
+      name: 'Garrafa 360º Geométrica', 
+      img: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=600&h=1066&q=80',
+      isGif: true
+    },
+  ],
+  'copos': [
+    { id: 'c4_1', name: 'Copo Térmico 473ml', img: 'https://i.imgur.com/HV7R6RH.jpg', size: '473ml' },
+    { id: 'c4_2', name: 'Copo Térmico 473ml', img: 'https://i.imgur.com/eSeV7Vh.jpg', size: '473ml' },
+    { id: 'c4_3', name: 'Copo Térmico 473ml', img: 'https://i.imgur.com/j1Ogs8k.jpg', size: '473ml' },
+    { id: 'c4_4', name: 'Copo Térmico 473ml', img: 'https://i.imgur.com/QFUHmsb.jpg', size: '473ml' },
+  ],
+  'garrafas': [
+    { id: 'g1', name: 'Garrafa Térmica Sport', img: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&h=1066&q=80', size: '500ml' },
+    { id: 'g2', name: 'Garrafa Elegance', img: 'https://images.unsplash.com/photo-1544911845-1f34a3eb46b1?auto=format&fit=crop&w=600&h=1066&q=80', size: '750ml' },
+  ],
+  'kit-churrasco': [
+    { id: 'k1', name: 'Kit Churrasco Master', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&h=1066&q=80' },
+    { id: 'k2', name: 'Maleta Premium', img: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=600&h=1066&q=80' },
+  ],
+  'porta-joias': [
+    { id: 'p1', name: 'Porta Jóias Clássico', img: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=600&h=1066&q=80' },
+    { id: 'p2', name: 'Estojo Aveludado', img: 'https://images.unsplash.com/photo-1560662243-7f2409f58ea6?auto=format&fit=crop&w=600&h=1066&q=80' },
+  ],
+  'tabuas': [
+    { id: 't1', name: 'Tábua Rústica Nobre', img: 'https://images.unsplash.com/photo-1626808642875-0aa545481fd6?auto=format&fit=crop&w=600&h=1066&q=80' },
+    { id: 't2', name: 'Tábua Redonda Frios', img: 'https://images.unsplash.com/photo-1576097449798-7c7f90e1248a?auto=format&fit=crop&w=600&h=1066&q=80' },
+  ]
+};
+
+// --- COMPONENTE DE MÍDIA INTELIGENTE (Auto-deteta Vídeo ou Imagem) ---
+const Media = ({ src, alt, className, controls = false, ...props }) => {
+  const isVideo = src?.match(/\.(mp4|webm)$/i);
+  if (isVideo) {
+    return (
+      <video 
+        src={src} 
+        autoPlay 
+        loop 
+        muted 
+        playsInline 
+        controls={controls}
+        className={className} 
+        {...props} 
+      />
+    );
+  }
+  return <img src={src} alt={alt} className={className} {...props} />;
+};
+
+// --- COMPONENTE LASER REVEAL TEXT ---
+const LaserRevealText = ({ children, delay = 0, duration = 0.5, className = "" }) => {
+  return (
+    <span 
+      className={`relative inline-block overflow-visible ${className}`} 
+      style={{ '--dur': `${duration}s`, '--del': `${delay}s` }}
+    >
+      <span className="opacity-0 animate-laser-clip inline-block w-full text-left">
+        {children}
+      </span>
+      <span className="absolute top-[-5%] bottom-[-5%] left-0 w-[2px] bg-white shadow-[0_0_6px_2px_#D4AF37,_0_0_12px_4px_rgba(212,175,55,0.8)] opacity-0 animate-laser-beam pointer-events-none z-[60]"></span>
+    </span>
+  );
+};
+
+// --- COMPONENTES ---
+const Button = ({ children, onClick, primary = true, className = "", icon: Icon }) => {
+  const baseStyle = "inline-flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-3 rounded-full font-medium transition-all duration-300 w-full sm:w-auto text-sm md:text-base cursor-pointer";
+  const primaryStyle = "bg-[#25D366] text-white hover:bg-[#20bd5a] border-none btn-whatsapp-pulse";
+  const secondaryStyle = "bg-transparent border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white";
+  const combinedClass = `${baseStyle} ${primary ? primaryStyle : secondaryStyle} ${className}`;
+
+  return (
+    <button onClick={onClick} className={combinedClass}>
+      {Icon && <Icon size={18} className="md:w-5 md:h-5" />}
+      {children}
+    </button>
+  );
+};
+
+// --- NOVO COMPONENTE: SHOWCASE 360º (MOLDURA ELEGANTE EM VEZ DE PLATAFORMA 3D) ---
+const Showcase360 = ({ products, onWhatsApp, themeClasses }) => {
+  const [idx, setIdx] = useState(0);
+  const product = products[idx];
+
+  const handleNext = () => setIdx((prev) => (prev + 1) % products.length);
+  const handlePrev = () => setIdx((prev) => (prev - 1 + products.length) % products.length);
+
+  if (!product) return null;
+
+  return (
+    <div className="animate-in fade-in zoom-in-95 duration-700 flex flex-col items-center justify-center min-h-[75vh] w-full relative">
+      
+      {/* Cabeçalho */}
+      <div className="mb-8 sm:mb-12 text-center z-20">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-elegant italic font-bold mb-3 text-[#D4AF37] tracking-wide">
+          Visão 360º
+        </h1>
+        <p className={`${themeClasses.heroSubtitle} text-sm sm:text-base md:text-lg`}>
+          Explore todos os detalhes em movimento
+        </p>
+      </div>
+
+      {/* Galeria Showcase */}
+      <div className="relative flex flex-col items-center w-full max-w-sm sm:max-w-md">
+        
+        {/* Moldura do Vídeo */}
+        <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(212,175,55,0.15)] border border-[#D4AF37]/30 bg-[#050505] group">
+          
+          <Media 
+            src={product.img} 
+            alt={product.name} 
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          
+          {/* Selo 360º */}
+          {product.isGif && (
+            <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#D4AF37]/40 text-[10px] font-bold text-white flex items-center gap-1.5 z-40 shadow-lg">
+              <RotateCw size={14} className="animate-spin-slow text-[#D4AF37]" /> 360º
+            </div>
+          )}
+
+          {/* Sombras Internas para dar profundidade à moldura */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none"></div>
+
+          {/* Setas Flutuantes dentro da moldura */}
+          {products.length > 1 && (
+            <>
+              <button 
+                onClick={handlePrev} 
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 text-white rounded-full hover:bg-[#D4AF37] hover:text-black transition-all backdrop-blur-md border border-white/10 opacity-70 hover:opacity-100"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={handleNext} 
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 text-white rounded-full hover:bg-[#D4AF37] hover:text-black transition-all backdrop-blur-md border border-white/10 opacity-70 hover:opacity-100"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Informações e Botão */}
+        <div className="mt-8 text-center z-30 flex flex-col items-center w-full px-4">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 text-white drop-shadow-md">
+            {product.name}
+          </h2>
+          <Button 
+            onClick={(e) => onWhatsApp(product.name, e, '360-btn')} 
+            icon={WhatsAppIcon}
+            primary={true}
+            className="w-full shadow-[0_0_20px_rgba(37,211,102,0.3)] hover:scale-105"
+          >
+            Pedir orçamento
+          </Button>
+        </div>
+
+        {/* Indicadores de Posição (Bolinhas) */}
+        {products.length > 1 && (
+          <div className="flex gap-2 mt-6">
+            {products.map((_, i) => (
+              <button 
+                key={i} 
+                onClick={() => setIdx(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${i === idx ? 'bg-[#D4AF37] w-6' : 'bg-white/20 w-2 hover:bg-white/40'}`}
+                aria-label={`Ver produto ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+};
+
+
+export default function App() {
+  const [currentView, setCurrentView] = useState('home');
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(true); 
+  
+  const [launchData, setLaunchData] = useState(null);
+  const [launchPhase, setLaunchPhase] = useState(0); 
+  
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
+  const STORY_DURATION = 4000;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentView, selectedCategory]);
+
+  useEffect(() => {
+    if (currentView !== 'home') return;
+    const timer = setInterval(() => {
+      setActiveStoryIndex((prevIndex) => (prevIndex + 1) % STORY_IMAGES.length);
+    }, STORY_DURATION);
+    return () => clearInterval(timer);
+  }, [currentView, activeStoryIndex]);
+
+  useEffect(() => {
+    if (launchData) {
+      const p1 = setTimeout(() => setLaunchPhase(1), 50);
+      const p2 = setTimeout(() => setLaunchPhase(2), 400);
+      const p3 = setTimeout(() => setLaunchPhase(3), 900);
+      const p4 = setTimeout(() => {
+        window.open(launchData.url, '_blank');
+        setLaunchData(null);
+        setLaunchPhase(0);
+      }, 1600);
+
+      return () => {
+        clearTimeout(p1); clearTimeout(p2); clearTimeout(p3); clearTimeout(p4);
+      };
+    }
+  }, [launchData]);
+
+  const handleNextStory = (e) => {
+    e.stopPropagation();
+    setActiveStoryIndex((prev) => (prev + 1) % STORY_IMAGES.length);
+  };
+
+  const handlePrevStory = (e) => {
+    e.stopPropagation();
+    setActiveStoryIndex((prev) => (prev - 1 + STORY_IMAGES.length) % STORY_IMAGES.length);
+  };
+
+  const navigateToCategory = (cat) => {
+    setSelectedCategory(cat);
+    setCurrentView('category');
+    setSelectedProduct(null);
+  };
+
+  const navigateToHome = () => {
+    setCurrentView('home');
+    setSelectedCategory(null);
+    setSelectedProduct(null);
+  };
+
+  const handleWhatsAppRedirect = (url, e, id) => {
+    if (e) e.preventDefault();
+    if (e && e.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      let startRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+      
+      if (id === 'story') {
+        const size = 60;
+        startRect.left = rect.left + (rect.width / 2) - (size / 2);
+        startRect.top = rect.top + (rect.height / 2) - (size / 2);
+        startRect.width = size;
+        startRect.height = size;
+      } else if (id === '360-btn') {
+        startRect.left = rect.left;
+        startRect.top = rect.top;
+      }
+
+      setLaunchData({ url, id, x: startRect.left, y: startRect.top, w: startRect.width, h: startRect.height });
+      setLaunchPhase(0);
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
+  const getWhatsAppLink = (productName = "") => {
+    const text = productName 
+      ? `${WHATSAPP_BASE_MSG}: ${productName}` 
+      : WHATSAPP_BASE_MSG;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  };
+
+  const themeClasses = {
+    bgMain: isDarkMode ? 'bg-[#0a0a0a]' : 'bg-[#f8f9fa]',
+    textMain: isDarkMode ? 'text-white' : 'text-slate-900',
+    sidebarBg: isDarkMode ? 'bg-[#121212]' : 'bg-[#ffffff]',
+    sidebarBorder: isDarkMode ? 'border-[#262626]' : 'border-slate-200',
+    navBtnInactiveBg: isDarkMode ? 'hover:bg-[#1a1a1a]' : 'hover:bg-slate-100',
+    navBtnInactiveText: isDarkMode ? 'text-neutral-400' : 'text-slate-600',
+    heroSubtitle: isDarkMode ? 'text-neutral-400' : 'text-slate-500',
+    heroTagBg: isDarkMode ? 'bg-[#171717]' : 'bg-[#f1f5f9]',
+    cardBg: isDarkMode ? 'bg-[#171717]' : 'bg-white',
+    cardBorder: isDarkMode ? 'border-[#262626]' : 'border-slate-200',
+    cardImgBg: isDarkMode ? 'bg-[#0a0a0a]' : 'bg-slate-100',
+    cardInnerBg: isDarkMode ? 'bg-[#0a0a0a]' : 'bg-slate-50',
+    textMuted: isDarkMode ? 'text-neutral-500' : 'text-slate-400',
+    textNormal: isDarkMode ? 'text-neutral-200' : 'text-slate-700',
+  };
+
+  return (
+    <div className={`min-h-screen ${themeClasses.bgMain} ${themeClasses.textMain} font-sans selection:bg-[#D4AF37] selection:text-black transition-colors duration-300 flex overflow-x-hidden relative`}>
+      
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+          
+          .font-elegant { font-family: 'Playfair Display', serif; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+          @keyframes story-progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+          }
+          .animate-story-progress {
+            animation: story-progress ${STORY_DURATION}ms linear forwards;
+          }
+
+          @keyframes pulse-whatsapp {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1.03); box-shadow: 0 0 0 12px rgba(37, 211, 102, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+          }
+          .btn-whatsapp-pulse { animation: pulse-whatsapp 2s infinite ease-in-out; }
+
+          /* ANIMAÇÕES DO FOGUETE */
+          @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-3px) rotate(-5deg); }
+            50% { transform: translateX(3px) rotate(5deg); }
+            75% { transform: translateX(-3px) rotate(-5deg); }
+          }
+          .animate-shake { animation: shake 0.15s infinite; }
+          
+          @keyframes flicker {
+            0%, 100% { transform: scaleY(1); opacity: 1; }
+            50% { transform: scaleY(1.4); opacity: 0.8; }
+          }
+          .animate-flicker { animation: flicker 0.1s infinite; }
+          .ease-blast { transition-timing-function: cubic-bezier(0.5, -0.3, 0.2, 1); }
+
+          /* ANIMAÇÕES DO LASER REVEAL TEXT */
+          @keyframes fade-in-scale {
+            0% { opacity: 0; transform: scale(0.8); filter: brightness(1.5) drop-shadow(0 0 10px #D4AF37); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1) drop-shadow(0 0 10px rgba(212,175,55,0.4)); }
+          }
+          .animate-fade-in-scale { animation: fade-in-scale 0.8s ease-out forwards; }
+
+          @keyframes laser-clip {
+            0% { clip-path: inset(0 100% 0 0); opacity: 1; filter: drop-shadow(0 0 3px rgba(212,175,55,0.5)); }
+            80% { filter: drop-shadow(0 0 3px rgba(212,175,55,0.5)); }
+            100% { clip-path: inset(0 0 0 0); opacity: 1; filter: none; }
+          }
+          .animate-laser-clip { animation: laser-clip var(--dur) var(--del) forwards linear; }
+
+          @keyframes laser-beam {
+            0% { left: 0%; opacity: 1; }
+            95% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+          }
+          .animate-laser-beam { animation: laser-beam var(--dur) var(--del) forwards linear; }
+
+          @keyframes fade-in-icon {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+          .animate-fade-icon {
+            opacity: 0;
+            animation: fade-in-icon 0.4s var(--del) forwards ease-out;
+          }
+
+          /* Animação do efeito Laser Sweep (Original) */
+          @keyframes laser-sweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+          }
+          .laser-effect-container { position: relative; overflow: hidden; }
+          .laser-effect-container::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            z-index: 0; animation: laser-sweep 3s infinite linear;
+          }
+          .laser-effect-line {
+            position: absolute; bottom: 0; left: 0; width: 50%; height: 2px;
+            background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+            animation: laser-sweep 3s infinite linear; box-shadow: 0 0 8px #D4AF37; z-index: 10;
+          }
+
+          /* Carrossel Infinito */
+          @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-scroll { animation: scroll 20s linear infinite; }
+          .animate-scroll:hover { animation-play-state: paused; }
+
+          /* Animação giratória */
+          @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .animate-spin-slow { animation: spin-slow 4s linear infinite; }
+
+        `}
+      </style>
+
+      {/* --- MENU LATERAL --- */}
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 w-[100px] sm:w-[130px] md:w-64 ${themeClasses.sidebarBg} border-r ${themeClasses.sidebarBorder} flex flex-col transition-all duration-300 ease-in-out shadow-xl md:shadow-none overflow-hidden`}
+      >
+        <div className={`p-3 md:p-6 border-b ${themeClasses.sidebarBorder} flex flex-col items-center gap-2 md:gap-3`}>
+          <img 
+            src="https://i.imgur.com/fWLcqLl.jpg" 
+            alt="Logo" 
+            className="w-12 h-12 md:w-24 md:h-24 rounded-full object-cover opacity-0 animate-fade-in-scale" 
+            style={{ animationDelay: '0s' }}
+          />
+          <div className="text-center w-full">
+            <span className="font-semibold text-[9px] md:text-sm tracking-widest uppercase block text-gray-300 leading-none">
+              <LaserRevealText delay={0.3} duration={0.6}>Tudo Com</LaserRevealText>
+            </span>
+            <span className="font-bold text-[11px] md:text-2xl text-[#D4AF37] block mt-0.5 md:mt-1 drop-shadow-md leading-none">
+              <LaserRevealText delay={0.9} duration={0.6}>Laser</LaserRevealText>
+            </span>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-4 md:py-6 px-2 md:px-4 space-y-1.5 md:space-y-2 no-scrollbar">
+          
+          <button
+            onClick={navigateToHome}
+            className={`w-full text-center md:text-left px-1 md:px-4 py-2.5 md:py-3.5 rounded-lg md:rounded-xl text-[10px] md:text-sm font-bold transition-all duration-200 flex flex-col md:flex-row items-center gap-1 md:gap-3 leading-tight
+              ${currentView === 'home' 
+                ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 laser-effect-container' 
+                : `border border-transparent ${themeClasses.navBtnInactiveText} ${themeClasses.navBtnInactiveBg}`
+              }
+            `}
+          >
+            {currentView === 'home' && <div className="laser-effect-line"></div>}
+            
+            <div 
+              className={`shrink-0 w-1.5 h-1.5 rounded-full hidden md:block animate-fade-icon ${currentView === 'home' ? 'bg-[#D4AF37]' : 'bg-transparent'}`}
+              style={{ '--del': '1.5s' }}
+            ></div>
+            
+            <span className="relative z-20 w-full">
+              <LaserRevealText delay={1.5} duration={0.4}>Início</LaserRevealText>
+            </span>
+          </button>
+
+          <div className="h-2 md:h-4"></div>
+          
+          {CATEGORIES.map((cat, idx) => {
+            const delayTime = 1.7 + (idx * 0.15);
+            return (
+              <button
+                key={cat.id}
+                onClick={() => navigateToCategory(cat)}
+                className={`w-full text-center md:text-left px-1 md:px-4 py-2.5 md:py-3.5 rounded-lg md:rounded-xl text-[10px] md:text-sm font-medium transition-all duration-200 flex flex-col md:flex-row items-center gap-1 md:gap-3 leading-tight
+                  ${selectedCategory?.id === cat.id 
+                    ? 'bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 laser-effect-container' 
+                    : `border border-transparent ${themeClasses.navBtnInactiveText} ${themeClasses.navBtnInactiveBg}`
+                  }
+                `}
+              >
+                {selectedCategory?.id === cat.id && <div className="laser-effect-line"></div>}
+                
+                <div 
+                  className={`shrink-0 w-1.5 h-1.5 rounded-full hidden md:block animate-fade-icon ${selectedCategory?.id === cat.id ? 'bg-[#D4AF37]' : 'bg-transparent'}`}
+                  style={{ '--del': `${delayTime}s` }}
+                ></div>
+                
+                <span className="relative z-20 line-clamp-2 w-full">
+                   <LaserRevealText delay={delayTime} duration={0.4}>{cat.name}</LaserRevealText>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className={`p-2 md:p-6 border-t ${themeClasses.sidebarBorder} flex flex-col gap-2 md:gap-3`}>
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`w-full flex flex-col md:flex-row justify-center md:justify-start items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg md:rounded-xl transition-colors font-medium ${isDarkMode ? 'text-neutral-300 hover:bg-[#1a1a1a]' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            <div className="animate-fade-icon" style={{ '--del': `${1.7 + CATEGORIES.length * 0.15 + 0.1}s` }}>
+              {isDarkMode ? <Sun size={16} className="md:w-5 md:h-5" /> : <Moon size={16} className="md:w-5 md:h-5" />}
+            </div>
+            <span className="text-[9px] md:text-sm leading-tight w-full md:text-left text-center">
+              <LaserRevealText delay={1.7 + CATEGORIES.length * 0.15 + 0.1} duration={0.4}>
+                {isDarkMode ? 'Claro' : 'Escuro'}
+              </LaserRevealText>
+            </span>
+          </button>
+          
+          <a 
+            href="https://instagram.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`w-full flex flex-col md:flex-row justify-center md:justify-start items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg md:rounded-xl transition-colors font-medium ${isDarkMode ? 'text-neutral-300 hover:bg-[#1a1a1a]' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            <div className="animate-fade-icon" style={{ '--del': `${1.7 + CATEGORIES.length * 0.15 + 0.25}s` }}>
+              <Instagram size={16} className="md:w-5 md:h-5" />
+            </div>
+            <span className="text-[9px] md:text-sm leading-tight w-full md:text-left text-center">
+               <LaserRevealText delay={1.7 + CATEGORIES.length * 0.15 + 0.25} duration={0.4}>
+                 Insta
+               </LaserRevealText>
+            </span>
+          </a>
+        </div>
+      </aside>
+
+      {/* --- ÁREA PRINCIPAL --- */}
+      <main className="flex-1 w-full ml-[100px] sm:ml-[130px] md:ml-64 flex flex-col min-h-screen transition-all duration-300 overflow-hidden">
+        
+        <div className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-12">
+          
+          {currentView === 'home' ? (
+            
+            // --- HOME VIEW ---
+            <div className="animate-in fade-in duration-500 flex flex-col items-center justify-center gap-6 md:gap-12 pt-2 md:pt-4">
+              <div className="w-full text-center space-y-4 max-w-2xl mx-auto">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-elegant italic font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F3E5AB] to-[#D4AF37] pb-2 drop-shadow-sm">
+                  Destaques
+                </h1>
+              </div>
+
+              <div className="shrink-0 flex justify-center py-2 w-full">
+                <div
+                  onClick={(e) => handleWhatsAppRedirect(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Vi um produto nos destaques do site e gostaria de saber mais.")}`, e, 'story')}
+                  className="relative block w-[230px] sm:w-[320px] md:w-[400px] aspect-[9/16] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl bg-[#0a0a0a] group cursor-pointer"
+                >
+                  <div className="absolute inset-y-0 left-0 w-12 md:w-16 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" onClick={handlePrevStory}>
+                    <div className="bg-black/50 p-1 md:p-2 rounded-full text-white backdrop-blur-sm ml-1 md:ml-2 hover:bg-[#D4AF37] transition-colors"><ChevronLeft size={20} className="md:w-6 md:h-6"/></div>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 w-12 md:w-16 z-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleNextStory}>
+                    <div className="bg-black/50 p-1 md:p-2 rounded-full text-white backdrop-blur-sm mr-1 md:mr-2 hover:bg-[#D4AF37] transition-colors"><ChevronRight size={20} className="md:w-6 md:h-6"/></div>
+                  </div>
+
+                  <div className="absolute top-3 md:top-4 left-0 w-full px-3 md:px-4 flex gap-1 z-20">
+                    {STORY_IMAGES.map((_, idx) => (
+                      <div key={idx} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+                        <div
+                          key={idx === activeStoryIndex ? `active-${idx}` : `inactive-${idx}`}
+                          className={`h-full bg-white rounded-full ${
+                            idx < activeStoryIndex ? 'w-full' : 
+                            idx > activeStoryIndex ? 'w-0' : 
+                            'animate-story-progress'
+                          }`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {STORY_IMAGES.map((img, idx) => (
+                    <img 
+                      key={idx}
+                      src={img} 
+                      alt={`Destaque ${idx + 1}`} 
+                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
+                        idx === activeStoryIndex ? 'opacity-100 z-10 scale-100 group-hover:scale-[1.02]' : 'opacity-0 z-0 scale-105'
+                      }`}
+                    />
+                  ))}
+                  <div className="absolute top-0 left-0 w-full h-16 md:h-20 bg-gradient-to-b from-black/60 to-transparent z-10"></div>
+                </div>
+              </div>
+
+              <div className="w-full mt-6 md:mt-12 overflow-hidden">
+                <h2 className="text-2xl md:text-4xl font-elegant italic tracking-wide mb-4 md:mb-6 text-center text-[#D4AF37]">
+                  Nossos Trabalhos
+                </h2>
+                <div className="relative w-full bg-[#111] py-3 md:py-4 rounded-xl md:rounded-2xl flex">
+                  <div className="absolute inset-y-0 left-0 w-8 md:w-20 bg-gradient-to-r from-[#111] to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute inset-y-0 right-0 w-8 md:w-20 bg-gradient-to-l from-[#111] to-transparent z-10 pointer-events-none"></div>
+                  
+                  <div className="flex w-[200%] animate-scroll">
+                    {WORK_IMAGES.map((img, index) => (
+                      <div 
+                        key={index} 
+                        className="w-[120px] md:w-[200px] shrink-0 px-1.5 md:px-2 cursor-pointer transition-transform hover:scale-105"
+                        onClick={() => setFullscreenImage(img)}
+                      >
+                        <div className="aspect-[3/4] rounded-lg md:rounded-xl overflow-hidden border border-[#222]">
+                          <img src={img} alt="Trabalho" className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          ) : selectedCategory?.id === '360-graus' ? (
+            
+            // --- NOVA GALERIA SHOWCASE 360º ---
+            <Showcase360 
+              products={PRODUCTS_DB['360-graus']} 
+              onWhatsApp={(name, e, id) => handleWhatsAppRedirect(getWhatsAppLink(name), e, id)}
+              themeClasses={themeClasses}
+            />
+
+          ) : (
+
+            // --- CATEGORY VIEW NORMAL (Grade) ---
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-6 md:mb-8 text-center sm:text-left">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-elegant italic font-bold mb-1 md:mb-3 text-[#D4AF37] tracking-wide">{selectedCategory.name}</h1>
+                <p className={`${themeClasses.heroSubtitle} text-xs sm:text-sm md:text-lg`}>{selectedCategory.desc || 'Selecione um produto para expandir'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
+                {PRODUCTS_DB[selectedCategory.id]?.map((product) => (
+                  <button 
+                    key={product.id} 
+                    onClick={() => setSelectedProduct(product)}
+                    className={`relative w-full aspect-[9/16] rounded-xl md:rounded-2xl overflow-hidden group border ${themeClasses.cardBorder} hover:border-[#D4AF37] transition-all focus:outline-none focus:ring-2 focus:ring-[#D4AF37] text-left shadow-sm bg-[#0a0a0a]`}
+                  >
+                    {/* Componente Media renderiza <video> ou <img> de forma inteligente */}
+                    <Media 
+                      src={product.img} 
+                      alt={product.name} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                    />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-2 md:p-4 z-10">
+                      <div className="w-full">
+                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center mb-1.5 md:mb-2 border border-white/20">
+                          <Sparkles size={10} className="md:w-3 md:h-3 text-[#D4AF37]" />
+                        </div>
+                        <h3 className="text-white text-[10px] sm:text-xs md:text-sm font-medium line-clamp-2 leading-tight drop-shadow-md">
+                          {product.name}
+                        </h3>
+                        {product.size && (
+                          <span className="text-[#D4AF37] text-[9px] md:text-[10px] font-bold uppercase mt-0.5 md:mt-1 block">{product.size}</span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {(!PRODUCTS_DB[selectedCategory.id] || PRODUCTS_DB[selectedCategory.id].length === 0) && (
+                <div className={`text-center py-12 md:py-16 ${themeClasses.cardBg} rounded-xl md:rounded-2xl border ${themeClasses.cardBorder}`}>
+                  <p className={`${themeClasses.heroSubtitle} text-xs md:text-lg`}>Novos produtos em breve!</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* --- BOTÃO FLUTUANTE WHATSAPP --- */}
+      <button 
+        onClick={(e) => handleWhatsAppRedirect(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_GENERIC_MSG)}`, e, 'fab')}
+        className={`fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[45] flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-3 md:px-5 md:py-3.5 rounded-full font-semibold shadow-[0_4px_15px_rgba(37,211,102,0.4)] hover:bg-[#20bd5a] transition-all duration-300 border-none btn-whatsapp-pulse cursor-pointer 
+          ${launchData?.id === 'fab' ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+        `}
+      >
+        <WhatsAppIcon size={20} className="md:w-6 md:h-6 shrink-0" />
+        <span className="text-sm md:text-base hidden sm:inline">Faça o seu orçamento</span>
+        <span className="text-[11px] sm:hidden font-bold">Orçamento</span>
+      </button>
+
+      {/* --- MODAL DE PRODUTO (Grade) --- */}
+      {selectedProduct && !fullscreenImage && currentView === 'category' && selectedCategory?.id !== '360-graus' && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedProduct(null);
+          }}
+        >
+          <div className={`relative w-full max-w-[280px] sm:max-w-sm flex flex-col max-h-[90vh] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl ${themeClasses.cardBg} border ${themeClasses.cardBorder}`}>
+            
+            <button 
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/80 backdrop-blur-md transition-colors"
+            >
+              <X size={16} className="md:w-[18px] md:h-[18px]" />
+            </button>
+
+            <div 
+              className={`relative w-full h-[240px] md:h-80 shrink-0 cursor-pointer group ${themeClasses.cardImgBg}`}
+              onClick={() => setFullscreenImage(selectedProduct.img)}
+            >
+              <Media 
+                src={selectedProduct.img} 
+                alt={selectedProduct.name} 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity z-10">
+                <span className="bg-black/60 text-white text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-full backdrop-blur-sm">Tocar para ampliar</span>
+              </div>
+              <div className="absolute top-3 left-3 md:top-4 md:left-4 bg-black/60 backdrop-blur-md px-2 py-1 md:px-3 md:py-1.5 rounded-full border border-white/10 text-[9px] md:text-[10px] font-medium text-[#D4AF37] flex items-center gap-1.5 z-10">
+                <Sparkles size={10} className="md:w-3 md:h-3" /> Personalizável
+              </div>
+            </div>
+
+            <div className="p-4 md:p-5 flex flex-col flex-1 overflow-y-auto no-scrollbar">
+              <h3 className={`text-base md:text-xl font-bold mb-3 md:mb-4 ${themeClasses.textMain} leading-tight`}>{selectedProduct.name}</h3>
+              
+              {selectedProduct.size && (
+                <div className={`space-y-2 md:space-y-3 mb-4 md:mb-6 ${themeClasses.cardInnerBg} p-3 md:p-4 rounded-xl md:rounded-2xl border ${themeClasses.cardBorder}`}>
+                  <div className="flex justify-between items-center text-xs md:text-sm">
+                    <span className={themeClasses.textMuted}>Capacidade:</span> 
+                    <span className={`${themeClasses.textNormal} font-medium`}>{selectedProduct.size}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-auto pt-2 relative">
+                <Button 
+                  onClick={(e) => handleWhatsAppRedirect(getWhatsAppLink(selectedProduct.name), e, 'modal')} 
+                  icon={WhatsAppIcon}
+                  className={`w-full text-xs md:text-sm ${launchData?.id === 'modal' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                  primary={true}
+                >
+                  Pedir orçamento
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL IMAGEM TELA CHEIA --- */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/95 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button 
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 md:top-8 md:right-8 z-50 p-2 md:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
+          >
+            <X size={20} className="md:w-6 md:h-6" />
+          </button>
+          
+          <Media 
+            src={fullscreenImage} 
+            alt="Ampliada" 
+            controls={true}
+            className="max-w-full max-h-full object-contain p-2 md:p-8"
+          />
+        </div>
+      )}
+
+      {/* --- 🚀 EFEITO MÁGICO DO FOGUETE --- */}
+      {launchData && (
+        <>
+          <div className={`fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm pointer-events-none transition-opacity duration-500 ${launchPhase >= 1 ? 'opacity-100' : 'opacity-0'}`}></div>
+          
+          <div
+            className={`fixed z-[9999] bg-[#25D366] text-white flex items-center justify-center overflow-visible shadow-[0_4px_15px_rgba(37,211,102,0.6)]
+              ${launchPhase === 0 ? 'rounded-full' : 'rounded-full'}
+              ${launchPhase >= 1 ? 'transition-all duration-300 ease-in-out' : ''}
+              ${launchPhase === 2 ? 'animate-shake' : ''}
+              ${launchPhase === 3 ? 'ease-blast transition-transform duration-700' : ''}
+            `}
+            style={{
+              left: launchPhase >= 1 ? launchData.x + (launchData.w / 2) - (launchData.h / 2) : launchData.x,
+              top: launchData.y,
+              width: launchPhase >= 1 ? launchData.h : launchData.w,
+              height: launchData.h,
+              transform: launchPhase === 3 ? 'translateY(-120vh) scale(1.5)' : 'translateY(0) scale(1)'
+            }}
+          >
+            <div className="relative w-full h-full flex items-center justify-center overflow-visible">
+              
+              <div className={`absolute inset-0 flex items-center justify-center whitespace-nowrap transition-opacity duration-200 ${launchPhase >= 1 ? 'opacity-0' : 'opacity-100'}`}>
+                 {launchData.id === 'fab' ? (
+                   <div className="flex items-center justify-center gap-2 w-full">
+                     <WhatsAppIcon size={20} className="md:w-6 md:h-6 shrink-0" />
+                     <span className="text-sm md:text-base hidden sm:inline font-semibold">Faça o seu orçamento</span>
+                     <span className="text-[11px] sm:hidden font-bold">Orçamento</span>
+                   </div>
+                 ) : (launchData.id === 'modal' || launchData.id === '360-btn') ? (
+                   <div className="flex items-center justify-center gap-2 font-medium text-xs md:text-sm">
+                     <WhatsAppIcon size={18} className="md:w-5 md:h-5 shrink-0" />
+                     Pedir orçamento
+                   </div>
+                 ) : null}
+              </div>
+
+              <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${launchPhase >= 1 ? 'opacity-100' : 'opacity-0'}`}>
+                <Rocket className={`w-5 h-5 md:w-6 md:h-6 text-white ${launchPhase >= 2 ? 'animate-pulse' : ''}`} strokeWidth={2.5} />
+                <div className={`absolute -bottom-8 left-1/2 -translate-x-1/2 flex justify-center transition-opacity duration-200 ${launchPhase >= 2 ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="w-3 h-8 bg-gradient-to-b from-yellow-300 via-orange-500 to-red-600 rounded-full animate-flicker blur-[1px]"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </>
+      )}
+
+    </div>
+  );
+}
